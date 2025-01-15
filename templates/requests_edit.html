@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Weather Request</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Weather Request</h1>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" class="edit-form">
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" value="{{ request.location }}" class="short-input" required>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request.start_date }}">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request.end_date }}">
+            </div>
+            <br>
+            <div class="button-group">
+                <button type="submit" class="button">Save Changes</button>
+                <a href="{{ url_for('requests_view') }}" class="button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

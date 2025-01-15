@@ -1,10 +1,14 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, Response, request, render_template, redirect, url_for
 import requests
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
-from utils.util import format_file_structure, get_file_structure
+import json
+import csv
+import io
+from fpdf import FPDF
+from utils.util import format_file_structure, get_file_structure, format_weather_data
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,6 +44,7 @@ class WeatherRequest(db.Model):
         return f"<WeatherRequest {self.location} ({self.start_date} to {self.end_date})>"
 
 
+# Homepage 
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather_data = None
@@ -90,7 +95,7 @@ def home():
                     location=location,
                     start_date=start_date,
                     end_date=end_date,
-                    temperature_data=str(weather_data)
+                    temperature_data=json.dumps(weather_data) 
                 )
                 db.session.add(new_request)
                 db.session.commit()
@@ -113,7 +118,7 @@ def home():
     )
 
 
-# Read 
+# Read / View 
 @app.route('/requests', methods=['GET'])
 def requests_view():
     request_id = request.args.get('id')
@@ -127,7 +132,13 @@ def requests_view():
         return render_template('requests_view.html', requests=requests, single_view=False)
 
 
-# Edit 
+# Read and process data in lines. 
+@app.context_processor
+def utility_functions():
+    return dict(format_weather_data=format_weather_data)
+
+
+# Update / Edit
 @app.route('/requests/edit/<int:request_id>', methods=['GET', 'POST'])
 def requests_edit(request_id):
     weather_request = WeatherRequest.query.get_or_404(request_id)
@@ -138,7 +149,10 @@ def requests_edit(request_id):
         end_date = request.form.get('end_date')
 
         try:
-            # Validate start and end dates
+            # Validate input fields
+            if not location:
+                raise ValueError("Location cannot be empty.")
+
             if start_date and end_date:
                 start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
                 end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
@@ -150,6 +164,7 @@ def requests_edit(request_id):
             weather_request.start_date = start_date or weather_request.start_date
             weather_request.end_date = end_date or weather_request.end_date
 
+            # Commit changes to the database
             db.session.commit()
             return redirect(url_for('requests_view'))
 
@@ -157,6 +172,88 @@ def requests_edit(request_id):
             return render_template('requests_edit.html', request=weather_request, error=str(e))
 
     return render_template('requests_edit.html', request=weather_request, error=None)
+
+
+# Delete 
+@app.route('/requests/delete/<int:request_id>', methods=['POST'])
+def requests_delete(request_id):
+    weather_request = WeatherRequest.query.get_or_404(request_id)
+    try:
+        db.session.delete(weather_request)
+        db.session.commit()
+        return redirect(url_for('requests_view'))
+    except Exception as e:
+        return f"An error occurred while deleting the request: {e}", 500
+
+
+# Data exports 
+@app.route('/export/<format>', methods=['GET'])
+def export_data(format):
+    # Query all weather requests from the database
+    weather_requests = WeatherRequest.query.all()
+
+    if not weather_requests:
+        return "No data available to export.", 404
+
+    if format == 'json':
+        # Export as JSON
+        data = [
+            {
+                "id": wr.id,
+                "location": wr.location,
+                "start_date": wr.start_date,
+                "end_date": wr.end_date,
+                "temperature_data": wr.temperature_data,
+            }
+            for wr in weather_requests
+        ]
+        response = Response(json.dumps(data, indent=4), mimetype="application/json")
+        response.headers["Content-Disposition"] = "attachment; filename=weather_data.json"
+        return response
+
+    elif format == 'csv':
+        # Export as CSV using an in-memory buffer
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["ID", "Location", "Start Date", "End Date", "Temperature Data"])  # Write headers
+        for wr in weather_requests:
+            writer.writerow([wr.id, wr.location, wr.start_date, wr.end_date, wr.temperature_data])
+        response = Response(output.getvalue(), mimetype="text/csv")
+        response.headers["Content-Disposition"] = "attachment; filename=weather_data.csv"
+        output.close()  # Close the buffer
+        return response
+
+    elif format == 'pdf':
+        # Export as PDF
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Weather Requests Data", ln=True, align="C")
+        pdf.ln(10)
+
+        for wr in weather_requests:
+            formatted_data = format_weather_data(wr.temperature_data)
+            pdf.cell(0, 10, txt=f"ID: {wr.id}, Location: {wr.location}", ln=True)
+            pdf.cell(0, 10, txt=f"Start Date: {wr.start_date}, End Date: {wr.end_date}", ln=True)
+            pdf.ln(5)  # Add spacing between metadata and weather details
+
+            if "Error" in formatted_data:
+                pdf.cell(0, 10, txt="Error parsing weather data.", ln=True)
+            else:
+                # Add formatted weather details to the PDF
+                for key, value in formatted_data.items():
+                    pdf.cell(0, 10, txt=f"{key}: {value}", ln=True)
+            
+            pdf.ln(10)  # Add spacing before the next request
+
+        response = Response(pdf.output(dest='S').encode('latin1'))
+        response.headers["Content-Disposition"] = "attachment; filename=weather_data.pdf"
+        response.mimetype = "application/pdf"
+        return response
+
+    else:
+        return "Unsupported export format. Please use 'json', 'csv', or 'pdf'.", 400
 
 
 if __name__ == "__main__":

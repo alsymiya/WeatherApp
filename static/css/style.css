@@ -6,12 +6,22 @@ body {
     color: #333;
 }
 
+/* Style the table */
 table {
     border-collapse: collapse;
-    width: 80%; /* Adjust width as needed */
-    margin-bottom: 20px;
+    width: 100%;
+    text-align: center;
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Main*/
 .container {
     max-width: 600px;
     margin: 50px auto;
@@ -20,6 +30,18 @@ table {
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Center the table container */
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    width: 90%; /* Adjust width to fit buttons in one row */
+    max-width: 1200px; /* Prevent the table from being too wide */
+    overflow-x: auto; /* Handle overflow gracefully */
+}
+
 
 h1 {
     margin-bottom: 20px;
@@ -40,18 +62,76 @@ input[type="text"] {
     border-radius: 5px;
 }
 
-.button {
-    display: inline-block;
-    padding: 10px 20px;
+/* Center the action buttons and add spacing */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+}
+
+/* Normalize styles for all buttons and links with the .button class */
+.button, 
+.button[type="submit"] {
+    display: inline-flex; /* Consistent alignment */
+    align-items: center; /* Vertically align content */
+    justify-content: center; /* Horizontally align content */
+    padding: 8px 16px;
+    font-size: 14px; /* Explicit font size */
+    font-family: Arial, sans-serif; /* Explicit font family */
+    font-weight: 400; /* Explicit font weight */
+    text-align: center; /* Center text inside the button */
+    text-decoration: none; /* Remove underline for links */
+    color: white; /* Text color */
+    background-color: #007BFF; /* Button background */
+    border-radius: 5px; /* Rounded corners */
+    border: none; /* No border for consistency */
+    cursor: pointer; /* Pointer on hover */
+    min-width: 75px; /* Set minimum width for uniformity */
+    height: 40px; /* Explicit height to enforce size consistency */
+    box-sizing: border-box; /* Include padding and border in size calculations */
+    overflow: hidden; /* Prevent accidental overflow issues */
+}
+
+/* Specific styles for the Delete button */
+.delete-button {
+    background-color: #d9534f; /* Red background */
+}
+
+.delete-button:hover {
+    background-color: #c9302c; /* Darker red on hover */
+}
+
+/* Hover effect for all buttons */
+.button:hover, 
+.button[type="submit"]:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Reset default styles for <a> and <button> */
+a.button, 
+button.button {
+    all: unset; /* Remove all default browser styling */
+    display: inline-flex; /* Restore flexbox layout */
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    font-weight: 400;
+    text-align: center;
     background-color: #007BFF;
     color: white;
     text-decoration: none;
     border-radius: 5px;
-    text-align: center;
-    font-size: 16px;
+    cursor: pointer;
+    box-sizing: border-box;
+    min-width: 75px;
+    height: 40px;
 }
 
-.button:hover {
+/* Restore hover effects */
+a.button:hover, 
+button.button:hover {
     background-color: #0056b3;
 }
 
@@ -64,19 +144,6 @@ input[type="text"] {
     text-align: center;
 }
 
-a.button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007BFF; /* Same as button background */
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 16px;
-    text-align: center;
-}
 
-a.button:hover {
-    background-color: #0056b3; /* Same as button hover background */
-}
 
 

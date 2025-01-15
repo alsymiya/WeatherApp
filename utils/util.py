@@ -1,33 +1,20 @@
 import os
+import json
+from datetime import datetime
 
-"""
-# Utility function to get file structure while ignoring .git files
+# Utility function to get file structure while ignoring .gitattributes, .git and .pyc files
 def get_file_structure(base_dir):
     file_structure = []
     for root, dirs, files in os.walk(base_dir):
         # Ignore .git directories
         dirs[:] = [d for d in dirs if d != ".git"]
         for name in files:
-            rel_dir = os.path.relpath(root, base_dir)
-            rel_file = os.path.join(rel_dir, name) if rel_dir != '.' else name
-            file_structure.append(rel_file)
-    return file_structure
-"""
-
-# Utility function to get file structure while ignoring .git and .pyc files
-def get_file_structure(base_dir):
-    file_structure = []
-    for root, dirs, files in os.walk(base_dir):
-        # Ignore .git directories
-        dirs[:] = [d for d in dirs if d != ".git"]
-        for name in files:
-            if not name.endswith('.pyc'):
+            if not name.endswith('.pyc') and not name.endswith('.gitattributes'):
                 rel_dir = os.path.relpath(root, base_dir)
                 rel_file = os.path.join(rel_dir, name) if rel_dir != '.' else name
                 file_structure.append(rel_file)
     return file_structure
 
-import os
 
 def format_file_structure(file_structure):
     """
@@ -66,3 +53,25 @@ def build_tree_string(tree, prefix=""):
             subtree_lines = build_tree_string(subtree, prefix + extension).split("\n")
             lines.extend(subtree_lines)
     return "\n".join(lines)
+
+
+def format_weather_data(weather_data):
+    try:
+        # Parse the string into a dictionary
+        data = json.loads(weather_data)
+        formatted_data = {
+            "Location": data.get("name", "Unknown"),
+            "Temperature": f"{data['main']['temp']} °C",
+            "Feels Like": f"{data['main']['feels_like']} °C",
+            "Weather": data['weather'][0]['description'].capitalize(),
+            "Wind Speed": f"{data['wind']['speed']} m/s",
+            "Pressure": f"{data['main']['pressure']} hPa",
+            "Humidity": f"{data['main']['humidity']}%",
+            "Sunrise": datetime.fromtimestamp(data['sys']['sunrise']).strftime('%H:%M:%S'),
+            "Sunset": datetime.fromtimestamp(data['sys']['sunset']).strftime('%H:%M:%S'),
+        }
+        return formatted_data
+    except Exception as e:
+        return {"Error": str(e)}
+    
+
