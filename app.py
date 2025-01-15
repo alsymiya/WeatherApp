@@ -259,4 +259,7 @@ def export_data(format):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()  # Ensure the database and tables are created
-    app.run(debug=True)
+    #app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Running on port {port}")  # Log the port to the console
+    app.run(host="0.0.0.0", port=port)
