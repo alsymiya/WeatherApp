@@ -1,0 +1,7 @@
+Welcome to the Weather App! This tool allows you to:
+- Search weather by location and date range.
+- View previously searched data.
+- Export weather data in various formats.
+
+This is a weather app project written by the job application Zhijie Lyu, whose PhD career is about geometric folding algorithms. He spent some time chatting with ChatGPT and made this just before the deadline. 
+

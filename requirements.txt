@@ -1,0 +1,7 @@
+Flask
+flask-sqlalchemy
+python-dotenv
+requests
+fuzzywuzzy
+pandas
+reportlab

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Weather Requests</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Saved Weather Requests</h1>
+
+        {% if requests and requests|length == 1 %}
+            <!-- Single request view -->
+            <h2>Request Details</h2>
+            <p><strong>ID:</strong> {{ requests[0].id }}</p>
+            <p><strong>Location:</strong> {{ requests[0].location }}</p>
+            <p><strong>Start Date:</strong> {{ requests[0].start_date }}</p>
+            <p><strong>End Date:</strong> {{ requests[0].end_date }}</p>
+            <p><strong>Temperature Data:</strong> {{ requests[0].temperature_data }}</p>
+            <a href="{{ url_for('requests_view') }}" class="button">Back to All Requests</a>
+        {% else %}
+            <!-- Table view of all requests -->
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Location</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                        <tr>
+                            <td>{{ request.id }}</td>
+                            <td>{{ request.location }}</td>
+                            <td>{{ request.start_date }}</td>
+                            <td>{{ request.end_date }}</td>
+                            <td>
+                                <!-- Link to view details -->
+                                <a href="{{ url_for('requests_view') }}?id={{ request.id }}">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <a href="{{ url_for('home') }}" class="button">Back to Home</a>
+    </div>
+</body>
+</html>
